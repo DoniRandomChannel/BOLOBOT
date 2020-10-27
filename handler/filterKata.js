@@ -3,29 +3,6 @@ const moment = require('moment-timezone')
 const _ = require('lodash')
 
 const {
-    Ytdl,
-    Igdl,
-    Wiki,
-    Toxic,
-    About,
-    Menu,
-    Donasi,
-    Nulis,
-    Lirik,
-    Cuaca,
-    Quotes,
-    QrMaker,
-    Gquotes,
-    Brainly,
-    Jsholat,
-    Primbon,
-    Translate,
-    Animhentai,
-    Downloader
-} = require('./../lib')
-
-
-const {
     insert,
     countHit,
     countUsers,
@@ -73,7 +50,12 @@ const filterKata = async (client = new Client(), message) => {
 
         insert(author, type, content, pushname, from, 'unknown')
 
-       
+        const kataKasar = 'anjing,kontol,bangsat,ajg,ngentod,memek,asu,asw,lmao,lol'.split(',')
+        if (isGroupMsg){
+            if (body.includes(kataKasar) == true){
+                await client.removeParticipant(groupId, author)
+            }
+        }
     } catch (err) {
         console.log(err)
     }
