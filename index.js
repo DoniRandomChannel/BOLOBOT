@@ -2,6 +2,7 @@ require('dotenv').config()
 const { create, Client } = require('@open-wa/wa-automate')
 const { options } = require('./lib/utils/options')
 const MessageHandler = require('./handler')
+const filterKata = require('./handler/filterKata')
 
 const start = (client = new Client()) => {
 
@@ -18,6 +19,8 @@ const start = (client = new Client()) => {
                 }
             })
         MessageHandler(client, message)
+        // custom hamdler
+        filterKata(client, message)
     })
 
     client.onAddedToGroup(({ groupMetadata: { id }, contact: { name } }) =>
