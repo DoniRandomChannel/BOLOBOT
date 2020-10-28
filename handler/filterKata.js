@@ -3,11 +3,10 @@ const moment = require('moment-timezone')
 const _ = require('lodash')
 
 const {
-    insert,
-    countHit,
-    countUsers,
-    statCommand
-} = require('./../database')
+    insertQueryKasar,
+    deleteQueryKasar,
+    showQueryKasar
+} = require('./../database/FilterKata')
 
 moment.tz.setDefault('Asia/Jakarta').locale('id')
 
@@ -48,13 +47,34 @@ const filterKata = async (client = new Client(), message) => {
 
         var tanggal  = moment.tz('Asia/Jakarta').format('YYYY-MM-DD')
 
-        insert(author, type, content, pushname, from, 'unknown')
+        const kataKasar = 'anjing,kontol,kntl,asu,tolol,garing'.split(',')
 
-        const kataKasar = 'anjing,kontol,bangsat,ajg,ngentod,memek,asu,asw,lmao,lol'.split(',')
-        if (isGroupMsg){
-            if (body.includes(kataKasar) == true){
-                await client.removeParticipant(groupId, author)
-            }
+        const searchKata = (text, re, i) => {
+            var inText = text.slice(i).search(re)
+            return inText < 0 ? inText : inText + 1
+        }
+
+        const re = /(anjing|kontol|asu|tolol|kntl|Anjing|Kontol|Asu|Tolol|Kntl|Mmk)/g
+
+        if (searchKata(content.toLowerCase(), re) >= 0) {
+            insertQueryKasar(author, type, content, pushname, from, 'katakasar')
+            showQueryKasar(groupId, author)
+                .then(async data => {
+                    const { user, count } = data
+                    if (count >= 5) {
+                        deleteQueryKasar(groupId, user)
+                        await client.removeParticipant(groupId, user)
+                    } else {
+                        let msg = `@${author.replace(/@c.us/g, '')} Memiliki ${count}/5 peringatan filter. Hati-hati!\nReason: *${content.match(re).join(' ')}*`
+                        client.sendTextWithMentions(from, msg)
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        } else if (content === '!warnkata') {
+            let kata = `List kata yang dilarang: kontol, kntl, asu, anjing, tolol.\n\nhati-hati dalam penggunaan kata-kata yah kak!`
+            client.reply(from, kata, id)
         }
     } catch (err) {
         console.log(err)
